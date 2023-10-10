@@ -304,42 +304,4 @@ except:
 
 
 #Function to push the data into GCP cloud
-def gcp_push(data, f_type):
-    try:
-
-        #Gets the current date format.
-
-        current_date = datetime.datetime.now().date()
-        current_month = current_date.strftime("%m")
-        current_date = datetime.datetime.now().date()
-        current_day = current_date.strftime("%d")
-        #Credentials are read from the credentials-python-storage.json file placed in the folder
-
-        client = storage.Client.from_service_account_json(
-            json_credentials_path=r'credentials-python-storage.json')
-        bucket = client.get_bucket('tmrw_scraping_data')
-        #File name with mandatory or non mandatory type will be saved
-
-        filename = f"Ajio_{f_type}.xlsx"
-        excel_buffer = pd.ExcelWriter(filename, engine='xlsxwriter')
-        data.to_excel(excel_buffer, index=False)
-        excel_buffer.close()
-        #Given below is the folder path in GCP
-
-        blob = bucket.blob(
-            f'pdp/ajio/2023/{current_month}/{current_day}/{filename}')
-        with open(filename, 'rb') as file:
-            blob.upload_from_file(
-                file, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-        print('Batch data uploaded to GCP.')
-    except Exception as e:
-        print(f"Failed to push the data to GCP: {e}")
-
-
-#This will push the mandatory data to the GCP
-gcp_push(all_data,f_type="Mandatory")
-
-#The below line of code pushes the Non-mandatory data to the GCP.
-gcp_push(only_nonMandatory, f_type = "Non_mandatory")
 
